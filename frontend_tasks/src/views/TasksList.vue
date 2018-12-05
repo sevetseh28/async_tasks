@@ -5,7 +5,7 @@
             <v-flex xs12>
                 <v-card>
                     <v-card-text>
-                        <v-form v-model="valid">
+                        <v-form v-model="valid" ref="form">
 
                             <v-container grid-list-md>
                                 <v-layout>
@@ -119,8 +119,6 @@
                     var argval = this.argument;
                     var probval = this.problem_type;
                     this.addLoading = true;
-                    this.problem_type = '';
-                    this.argument = '';
                     axios.post('/api/problem/', {
                         'problem_type': probval,
                         'argument': JSON.parse(argval)
@@ -131,7 +129,12 @@
                         this.addLoading = false;
                         alert(err)  // should be handled prettier for the user
                     });
+                    this.clear()
                 }
+            },
+
+            clear() {
+                this.$refs.form.reset()
             },
 
             getStatusColor(item) {
