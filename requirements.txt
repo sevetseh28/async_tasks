@@ -1,0 +1,7 @@
+django
+djangorestframework
+django_extensions
+scipy
+sympy
+celery
+psycopg2

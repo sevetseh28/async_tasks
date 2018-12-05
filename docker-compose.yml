@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:10.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  broker:
+    image: rabbitmq:3
+    ports:
+      - 5673:5672
+
+  slave_worker:
+    build: .
+    command: bash -c "cd /code && celery worker -l info -A tasks_slave"
+    volumes:
+      - .:/code
+    depends_on:
+      - broker
+
+  web:
+    build: .
+    command: python /code/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - 8000:8000
+    depends_on:
+      - slave_worker
+      - db
+      - broker
+
+  frontend:
+    image: tasks_frontend
+    command: npm run serve
+    ports:
+    - 8080:8080
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
