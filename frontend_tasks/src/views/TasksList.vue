@@ -93,7 +93,15 @@
             },
 
             createTask() {
-                axios.post('/api/problem/', {'problem_type': this.problem_type, 'argument': JSON.parse(this.argument)}).then(resp => {
+                var argval = this.argument;
+                var probval = this.problem_type;
+                this.problem_type = '';
+                this.argument = '';
+                axios.post('/api/problem/', {
+                    'problem_type': probval,
+                    'argument': JSON.parse(argval)
+                }).then(resp => {
+                    this.tasks.unshift(resp.data)
                 });
             },
 
