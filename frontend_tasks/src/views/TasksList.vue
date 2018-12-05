@@ -5,32 +5,40 @@
             <v-flex xs12>
                 <v-card>
                     <v-card-text>
-                        <v-container grid-list-md>
-                            <v-layout>
+                        <v-form v-model="valid">
 
-                                <v-flex xs6>
-                                    <v-select
-                                            v-model="problem_type"
-                                            :items="problem_types"
-                                            label="Problem type"
-                                    ></v-select>
-                                </v-flex>
+                            <v-container grid-list-md>
+                                <v-layout>
 
-                                <v-flex xs6>
-                                    <v-text-field
-                                            v-model="argument"
-                                            label="Argument"
-                                            required
-                                    ></v-text-field>
-                                </v-flex>
+                                    <v-flex xs6>
+                                        <v-select
+                                                v-model="problem_type"
+                                                :items="problem_types"
+                                                :rules="[rules.required]"
+                                                label="Problem type"
+                                                required
+                                        ></v-select>
+                                    </v-flex>
+
+                                    <v-flex xs6>
+                                        <v-text-field
+                                                v-model="argument"
+                                                :rules="[rules.isJson]"
+                                                label="Argument"
+                                                required
+                                        ></v-text-field>
+                                    </v-flex>
 
 
-                                <v-btn @click="createTask()" fab dark color="indigo">
-                                    <v-icon dark>add</v-icon>
-                                </v-btn>
-                            </v-layout>
+                                    <v-btn :loading="addLoading" @click="createTask()" :disabled="!valid" fab dark
+                                           color="indigo">
+                                        <v-icon dark>add</v-icon>
+                                    </v-btn>
+                                </v-layout>
 
-                        </v-container>
+                            </v-container>
+                        </v-form>
+
                     </v-card-text>
 
 
@@ -69,8 +77,22 @@
         data() {
             return {
                 problem_types: ['Integrate', 'Prime factoring'],
-                problem_type: '',
+                problem_type: null,
                 argument: '',
+                addLoading: false,
+                valid: false,
+                rules: {
+                    isJson: function (value) {
+                        try {
+                            JSON.parse(value);
+                            return true;
+                        }
+                        catch (err) {
+                            return 'Must be a number for prime factoring or a list of numbers for integration'
+                        }
+                    },
+                    required: v => !!v || 'Field is required'
+                },
                 tasks: [],
                 headers: [
                     {
@@ -93,16 +115,23 @@
             },
 
             createTask() {
-                var argval = this.argument;
-                var probval = this.problem_type;
-                this.problem_type = '';
-                this.argument = '';
-                axios.post('/api/problem/', {
-                    'problem_type': probval,
-                    'argument': JSON.parse(argval)
-                }).then(resp => {
-                    this.tasks.unshift(resp.data)
-                });
+                if (this.$refs.form.validate()) {
+                    var argval = this.argument;
+                    var probval = this.problem_type;
+                    this.addLoading = true;
+                    this.problem_type = '';
+                    this.argument = '';
+                    axios.post('/api/problem/', {
+                        'problem_type': probval,
+                        'argument': JSON.parse(argval)
+                    }).then(resp => {
+                        this.tasks.unshift(resp.data);
+                        this.addLoading = false;
+                    }).catch(err => {
+                        this.addLoading = false;
+                        alert(err)  // should be handled prettier for the user
+                    });
+                }
             },
 
             getStatusColor(item) {
