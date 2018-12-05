@@ -11,14 +11,6 @@ services:
     ports:
       - 5673:5672
 
-  slave_worker:
-    build: .
-    command: bash -c "cd /code && celery worker -l info -A tasks_slave"
-    volumes:
-      - .:/code
-    depends_on:
-      - broker
-
   web:
     build: .
     command: python /code/manage.py runserver 0.0.0.0:8000
@@ -27,7 +19,6 @@ services:
     ports:
       - 8000:8000
     depends_on:
-      - slave_worker
       - db
       - broker
 
