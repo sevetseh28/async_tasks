@@ -8,7 +8,7 @@ from celery import Celery
 from sympy import integrate, Symbol
 
 
-app = Celery('tasks_project', broker='amqp://172.20.0.3:5673', backend='amqp://172.20.0.3:5673')
+app = Celery('tasks_project', broker='amqp://host.docker.internal:5673', backend='amqp://host.docker.internal:5673')
 
 
 @celery.task(name='Integrate')
